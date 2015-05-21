@@ -27,6 +27,7 @@ angular.module('MassAutoComplete', [])
         ESC: 27,
         ENTER: 13,
         UP: 38,
+		RIGHT: 39,
         DOWN: 40
       };
 
@@ -197,6 +198,14 @@ angular.module('MassAutoComplete', [])
         var selected = $scope.results[i];
         current_element.val(selected.value);
         $scope.selected_index = i;
+
+        current_options.on_selection && current_options.on_selection(selected, i);
+
+        if (i > 0) {
+          current_element[0].selectionStart = $scope.results[0].value.length;
+          current_element[0].selectionEnd = selected.value.length;
+        }
+
         return selected;
       }
 
@@ -286,6 +295,7 @@ angular.module('MassAutoComplete', [])
             case KEYS.DOWN:
               if ($scope.results.length > 0) {
                 if ($scope.show_autocomplete) {
+                  e.preventDefault();
                   set_selection($scope.selected_index + 1 > $scope.results.length - 1 ? 0 : $scope.selected_index + 1);
                 } else {
                   $scope.show_autocomplete = true;
@@ -300,6 +310,21 @@ angular.module('MassAutoComplete', [])
               if ($scope.show_autocomplete) {
                 e.preventDefault();
                 set_selection($scope.selected_index - 1 >= 0 ? $scope.selected_index - 1 : $scope.results.length - 1);
+                $scope.$apply();
+              }
+              break;
+
+            case KEYS.RIGHT:
+              if ($scope.show_autocomplete) {
+                if ($scope.selected_index <= 0) {
+                  $scope.selected_index = 1;
+                }
+                if (!$scope.waiting_for_suggestion) {
+                  $scope.apply_selection($scope.selected_index);
+                  e.stopPropagation();
+                  e.preventDefault();
+                  $scope.show_autocomplete = false;
+                }
                 $scope.$apply();
               }
               break;
