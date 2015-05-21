@@ -1,5 +1,5 @@
 {
-  "name": "angular-mass-autocomplete",
+  "name": "fastec-angular-mass-autocomplete",
   "version": "0.2.4",
   "description": "Autocomplete for Angular.js applications with a lot to complete",
   "main": "massautocomplete.js",
