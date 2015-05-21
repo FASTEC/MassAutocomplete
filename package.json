@@ -5,7 +5,7 @@
   "main": "massautocomplete.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hakib/MassAutocomplete"
+    "url": "https://github.com/FASTEC/MassAutocomplete"
   },
   "keywords": [
     "angularjs",
