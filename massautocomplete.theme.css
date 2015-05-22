@@ -21,7 +21,6 @@
 }
 .ac-container .ac-menu .ac-menu-item {
   border-bottom: 1px dotted #ccc;
-  line-height: 35px;
   margin: 0;
 }
 .ac-container .ac-menu .ac-menu-item:last-child {
