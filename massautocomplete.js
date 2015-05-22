@@ -1,5 +1,5 @@
 angular.module('MassAutoComplete', [])
-.directive('massAutocomplete', ["$timeout", "$window", "$document", "$q", function ($timeout, $window, $document, $q) {
+.directive('massAutocomplete', ["$timeout", "$window", "$document", "$q", function($timeout, $window, $document, $q) {
   'use strict';
 
   return {
@@ -16,10 +16,10 @@ angular.module('MassAutoComplete', [])
           '</li>' +
         '</ul>' +
       '</div>',
-    link: function (scope, element) {
+    link: function(scope, element) {
       scope.container = angular.element(element[0].getElementsByClassName('ac-container')[0]);
     },
-    controller: ["$scope", function ($scope) {
+    controller: ["$scope", function($scope) {
       var that = this;
 
       var KEYS = {
@@ -27,7 +27,7 @@ angular.module('MassAutoComplete', [])
         ESC: 27,
         ENTER: 13,
         UP: 38,
-		RIGHT: 39,
+        RIGHT: 39,
         DOWN: 40
       };
 
@@ -50,24 +50,33 @@ angular.module('MassAutoComplete', [])
           current_options,
           previous_value,
           value_watch,
-          last_selected_value;
+          last_selected_value,
+          fakeEl;
 
       $scope.show_autocomplete = false;
 
       // Debounce - taken from underscore
       function debounce(func, wait, immediate) {
-          var timeout;
-          return function() {
-              var context = this, args = arguments;
-              var later = function() {
-                  timeout = null;
-                  if (!immediate) func.apply(context, args);
-              };
-              var callNow = immediate && !timeout;
-              clearTimeout(timeout);
-              timeout = setTimeout(later, wait);
-              if (callNow) func.apply(context, args);
+        var timeout;
+        return function() {
+          var context = this, args = arguments;
+          var later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
           };
+          var callNow = immediate && !timeout;
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+          if (callNow) func.apply(context, args);
+        };
+      }
+
+      function getTextWidth(text, font) {
+        if (!fakeEl) {
+          fakeEl = $('<span>').hide().appendTo(document.body);
+        }
+        fakeEl.text(text).css('font', font);
+        return fakeEl.width();
       }
 
       function _position_autocomplete() {
@@ -77,9 +86,15 @@ angular.module('MassAutoComplete', [])
             container = $scope.container[0];
 
         container.style.top = rect.top + rect.height + scrollTop + 'px';
-        container.style.left = rect.left + scrollLeft + 'px';
-        container.style.width = rect.width + 'px';
+        var left = rect.left + scrollLeft;
+        var textWidth = 0;
+
+        // TODO: Only change left if the current_element[0].value contains a delimiter. Then calc width to the last delimiter.
+        textWidth = getTextWidth(current_element[0].value, current_element[0].style.font);
+
+        container.style.left = left + textWidth + 'px';
       }
+
       var position_autocomplete = debounce(_position_autocomplete, user_options.debounce_position);
 
       // Attach autocomplete behaviour to an input element.
@@ -103,10 +118,10 @@ angular.module('MassAutoComplete', [])
         bind_element();
 
         value_watch = $scope.$watch(
-          function () {
+          function() {
             return ngmodel.$modelValue;
           },
-          function (nv, ov) {
+          function(nv, ov) {
             // Prevent suggestion cycle when the value is the last value selected.
             // When selecting from the menu the ng-model is updated and this watch
             // is triggered. This causes another suggestion cycle that will provide as
@@ -125,7 +140,7 @@ angular.module('MassAutoComplete', [])
         $scope.selected_index = 0;
         $scope.waiting_for_suggestion = true;
 
-        if (typeof(term) === 'string' && term.length > 0) {
+        if (typeof (term) === 'string' && term.length > 0) {
           $q.when(current_options.suggest(term),
             function suggest_succeeded(suggestions) {
               // Make sure the suggestion we are processing is of the current element.
@@ -135,12 +150,12 @@ angular.module('MassAutoComplete', [])
                 return;
 
               if (suggestions && suggestions.length > 0) {
-              // Add the original term as the first value to enable the user
-              // to return to his original expression after suggestions were made.
-                $scope.results = [{ value: term, label: ''}].concat(suggestions);
+                // Add the original term as the first value to enable the user
+                // to return to his original expression after suggestions were made.
+                $scope.results = [{ value: term, label: '' }].concat(suggestions);
                 $scope.show_autocomplete = true;
                 if (current_options.auto_select_first)
-                    set_selection(1);
+                  set_selection(1);
               } else {
                 $scope.results = [];
               }
@@ -155,6 +170,7 @@ angular.module('MassAutoComplete', [])
         } else {
           $scope.waiting_for_suggestion = false;
           $scope.show_autocomplete = false;
+          current_options.empty_term && current_options.empty_term();
           $scope.$apply();
         }
       }
@@ -162,7 +178,7 @@ angular.module('MassAutoComplete', [])
 
       // Trigger end of editing and remove all attachments made by
       // this directive to the input element.
-      that.detach = function () {
+      that.detach = function() {
         if (current_element) {
           var value = current_element.val();
           update_model_value(value);
@@ -212,7 +228,7 @@ angular.module('MassAutoComplete', [])
       // Apply and accept the current selection made from the menu.
       // When selecting from the menu directly (using click or touch) the
       // selection is directly applied.
-      $scope.apply_selection = function (i) {
+      $scope.apply_selection = function(i) {
         current_element[0].focus();
         if (!$scope.show_autocomplete || i > $scope.results.length || i < 0)
           return;
@@ -228,7 +244,7 @@ angular.module('MassAutoComplete', [])
       function bind_element() {
         angular.element($window).bind(EVENTS.RESIZE, position_autocomplete);
 
-        current_element.bind(EVENTS.BLUR, function () {
+        current_element.bind(EVENTS.BLUR, function() {
           // Detach the element from the auto complete when input loses focus.
           // Focus is lost when a selection is made from the auto complete menu
           // using the mouse (or touch). In that case we don't want to detach so
@@ -239,7 +255,7 @@ angular.module('MassAutoComplete', [])
           }, user_options.debounce_blur);
         });
 
-        current_element.bind(EVENTS.KEYDOWN, function (e) {
+        current_element.bind(EVENTS.KEYDOWN, function(e) {
           // Reserve key combinations with shift for different purposes.
           if (e.shiftKey) return;
 
@@ -255,8 +271,8 @@ angular.module('MassAutoComplete', [])
               }
               break;
 
-            // Select an element and close the menu. Or, if a selection is
-            // unavailable let the event propagate.
+              // Select an element and close the menu. Or, if a selection is
+              // unavailable let the event propagate.
             case KEYS.ENTER:
               // Accept a selection only if results exist, the menu is
               // displayed and the results are valid (no current request
@@ -280,8 +296,8 @@ angular.module('MassAutoComplete', [])
               $scope.$apply();
               break;
 
-            // Navigate the menu when it's open. When it's not open fall back
-            // to default behavior.
+              // Navigate the menu when it's open. When it's not open fall back
+              // to default behavior.
             case KEYS.TAB:
               if (!$scope.show_autocomplete)
                 break;
@@ -289,9 +305,9 @@ angular.module('MassAutoComplete', [])
               e.preventDefault();
               /* falls through */
 
-            // Open the menu when results exists but are not displayed. Or,
-            // select the next element when the menu is open. When reaching
-            // bottom wrap to top.
+              // Open the menu when results exists but are not displayed. Or,
+              // select the next element when the menu is open. When reaching
+              // bottom wrap to top.
             case KEYS.DOWN:
               if ($scope.results.length > 0) {
                 if ($scope.show_autocomplete) {
@@ -305,7 +321,7 @@ angular.module('MassAutoComplete', [])
               }
               break;
 
-            // Navigate up in the menu. When reaching the top wrap to bottom.
+              // Navigate up in the menu. When reaching the top wrap to bottom.
             case KEYS.UP:
               if ($scope.show_autocomplete) {
                 e.preventDefault();
@@ -332,7 +348,7 @@ angular.module('MassAutoComplete', [])
         });
       }
 
-      $scope.$on('$destroy', function () {
+      $scope.$on('$destroy', function() {
         that.detach();
         $scope.container.remove();
       });
@@ -340,18 +356,18 @@ angular.module('MassAutoComplete', [])
   };
 }])
 
-.directive('massAutocompleteItem', function () {
+.directive('massAutocompleteItem', function() {
   'use strict';
 
   return {
     restrict: "A",
     require: ["^massAutocomplete", "ngModel"],
-    scope: {'massAutocompleteItem' : "&"},
-    link: function (scope, element, attrs, required) {
+    scope: { 'massAutocompleteItem': "&" },
+    link: function(scope, element, attrs, required) {
       // Prevent html5/browser auto completion.
       attrs.$set('autocomplete', 'off');
 
-      element.bind('focus', function () {
+      element.bind('focus', function() {
         var options = scope.massAutocompleteItem();
         if (!options)
           throw "Invalid options";
