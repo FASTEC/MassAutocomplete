@@ -4,10 +4,13 @@ angular.module('MassAutoComplete', [])
 
   return {
     restrict: "A",
-    scope: { options: '&massAutocomplete' },
+    scope: {
+      options: '&massAutocomplete'
+    },
     transclude: true,
     template:
       '<span ng-transclude></span>' +
+      '<div class="background" type="text" ng-bind="selection" />' +
       '<div class="ac-container" ng-show="show_autocomplete && results.length > 0" style="position:absolute;">' +
         '<ul class="ac-menu">' +
           '<li ng-repeat="result in results" ng-if="$index > 0" ' +
@@ -53,6 +56,7 @@ angular.module('MassAutoComplete', [])
           last_selected_value,
           fakeEl;
 
+      $scope.selection = '';
       $scope.show_autocomplete = false;
 
       // Debounce - taken from underscore
@@ -90,7 +94,10 @@ angular.module('MassAutoComplete', [])
         var textWidth = 0;
 
         // TODO: Only change left if the current_element[0].value contains a delimiter. Then calc width to the last delimiter.
-        textWidth = getTextWidth(current_element[0].value, current_element[0].style.font);
+        var value = cur_element.val();
+        if (value.includes('.')) {
+          textWidth = getTextWidth(value.substring(0, value.lastIndexOf('.')), cur_element.css('font'));
+        }
 
         container.css('left', left + textWidth);
       }
@@ -153,6 +160,7 @@ angular.module('MassAutoComplete', [])
                 // Add the original term as the first value to enable the user
                 // to return to his original expression after suggestions were made.
                 $scope.results = [{ value: term, label: '' }].concat(suggestions);
+                $scope.selection = suggestions.length > 0 ? suggestions[0].value : '';
                 $scope.show_autocomplete = true;
                 if (current_options.auto_select_first)
                   set_selection(1);
@@ -166,11 +174,14 @@ angular.module('MassAutoComplete', [])
             }
           ).finally(function suggest_finally() {
             $scope.waiting_for_suggestion = false;
+            if ($scope.results.length === 0) {
+              $scope.selection = '';
+            }
           });
         } else {
           $scope.waiting_for_suggestion = false;
           $scope.show_autocomplete = false;
-          current_options.empty_term && current_options.empty_term();
+          $scope.selection = '';
           $scope.$apply();
         }
       }
@@ -215,9 +226,8 @@ angular.module('MassAutoComplete', [])
         current_element.val(selected.value);
         $scope.selected_index = i;
 
-        current_options.on_selection && current_options.on_selection(selected, i);
-
         if (i > 0) {
+          $scope.selection = selected.value;
           current_element[0].selectionStart = $scope.results[0].value.length;
           current_element[0].selectionEnd = selected.value.length;
         }
@@ -237,6 +247,8 @@ angular.module('MassAutoComplete', [])
         last_selected_value = selected.value;
         update_model_value(selected.value);
         $scope.show_autocomplete = false;
+
+        $scope.selection = '';
 
         current_options.on_select && current_options.on_select(selected);
       };
