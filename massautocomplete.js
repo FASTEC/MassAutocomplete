@@ -80,19 +80,19 @@ angular.module('MassAutoComplete', [])
       }
 
       function _position_autocomplete() {
-        var rect = current_element[0].getBoundingClientRect(),
-            scrollTop = $document[0].body.scrollTop || $document[0].documentElement.scrollTop || $window.pageYOffset,
-            scrollLeft = $document[0].body.scrollLeft || $document[0].documentElement.scrollLeft || $window.pageXOffset,
-            container = $scope.container[0];
+        var cur_element = angular.element(current_element[0]),
+            position = cur_element.position(),
+            height = cur_element.height(),
+            container = angular.element($scope.container[0]);
 
-        container.style.top = rect.top + rect.height + scrollTop + 'px';
-        var left = rect.left + scrollLeft;
+        container.css('top', position.top + height);
+        var left = position.left;
         var textWidth = 0;
 
         // TODO: Only change left if the current_element[0].value contains a delimiter. Then calc width to the last delimiter.
         textWidth = getTextWidth(current_element[0].value, current_element[0].style.font);
 
-        container.style.left = left + textWidth + 'px';
+        container.css('left', left + textWidth);
       }
 
       var position_autocomplete = debounce(_position_autocomplete, user_options.debounce_position);
