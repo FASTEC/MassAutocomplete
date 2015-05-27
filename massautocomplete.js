@@ -53,8 +53,7 @@ angular.module('MassAutoComplete', [])
           current_options,
           previous_value,
           value_watch,
-          last_selected_value,
-          fakeEl;
+          last_selected_value;
 
       $scope.selection = '';
       $scope.show_autocomplete = false;
@@ -75,29 +74,14 @@ angular.module('MassAutoComplete', [])
         };
       }
 
-      function getTextWidth(text, font) {
-        if (!fakeEl) {
-          fakeEl = $('<span>').hide().appendTo(document.body);
-        }
-        fakeEl.text(text).css('font', font);
-        return fakeEl.width();
-      }
-
       function _position_autocomplete() {
         var cur_element = angular.element(current_element[0]),
             position = cur_element.position(),
-            height = cur_element.height(),
             container = angular.element($scope.container[0]);
 
-        container.css('top', position.top + height);
+        container.css('top', position.top + cur_element.height());
         var left = position.left;
-        var textWidth = 0;
-
-        // TODO: Only change left if the current_element[0].value contains a delimiter. Then calc width to the last delimiter.
-        var value = cur_element.val();
-        if (value.includes('.')) {
-          textWidth = getTextWidth(value.substring(0, value.lastIndexOf('.')), cur_element.css('font'));
-        }
+        var textWidth = current_options.offset_width ? current_options.offset_width(cur_element) : 0;
 
         container.css('left', left + textWidth);
       }
