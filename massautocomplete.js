@@ -79,7 +79,7 @@ angular.module('MassAutoComplete', [])
             position = cur_element.position(),
             container = angular.element($scope.container[0]);
 
-        container.css('top', position.top + cur_element.height());
+        container.css('top', position.top + cur_element.outerHeight());
         var left = position.left;
         var textWidth = current_options.offset_width ? current_options.offset_width(cur_element) : 0;
 
@@ -117,11 +117,11 @@ angular.module('MassAutoComplete', [])
             // When selecting from the menu the ng-model is updated and this watch
             // is triggered. This causes another suggestion cycle that will provide as
             // suggestion the value that is currently selected - this is unnecessary.
-            if (nv === last_selected_value)
-              return;
+            //if (nv === last_selected_value)
+            //  return;
 
-            _position_autocomplete();
             suggest(nv, current_element);
+            position_autocomplete();
           }
         );
       }
@@ -131,7 +131,7 @@ angular.module('MassAutoComplete', [])
         $scope.selected_index = 0;
         $scope.waiting_for_suggestion = true;
 
-        if (typeof (term) === 'string' && term.length > 0) {
+        if (typeof (term) === 'string' && term.length >= 0) {
           $q.when(current_options.suggest(term),
             function suggest_succeeded(suggestions) {
               // Make sure the suggestion we are processing is of the current element.
@@ -144,8 +144,14 @@ angular.module('MassAutoComplete', [])
                 // Add the original term as the first value to enable the user
                 // to return to his original expression after suggestions were made.
                 $scope.results = [{ value: term, label: '' }].concat(suggestions);
-                $scope.selection = suggestions.length > 0 ? suggestions[0].value : '';
-                $scope.show_autocomplete = true;
+                $scope.selection = term.length > 0 && suggestions.length > 0 ? suggestions[0].value : '';
+                if ($scope.selection === term) {
+                  // The auto_complete list will be closed if selection and term are equal.
+                  $scope.show_autocomplete = false;
+                }
+                else {
+                  $scope.show_autocomplete = true;
+                }
                 if (current_options.auto_select_first)
                   set_selection(1);
               } else {
@@ -314,6 +320,9 @@ angular.module('MassAutoComplete', [])
                   $scope.selected_index = 0;
                 }
                 $scope.$apply();
+              }
+              else {
+                suggest('', current_element);
               }
               break;
 
