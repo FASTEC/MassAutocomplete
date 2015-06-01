@@ -145,8 +145,8 @@ angular.module('MassAutoComplete', [])
                 // to return to his original expression after suggestions were made.
                 $scope.results = [{ value: term, label: '' }].concat(suggestions);
                 $scope.selection = term.length > 0 && suggestions.length > 0 ? suggestions[0].value : '';
-                if ($scope.selection === term) {
-                  // The auto_complete list will be closed if selection and term are equal.
+                if ($scope.selection === term && term > 0) {
+                  // The auto_complete list will be closed if selection and term are equal and not empty.
                   $scope.show_autocomplete = false;
                 }
                 else {
