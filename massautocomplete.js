@@ -120,14 +120,14 @@ angular.module('MassAutoComplete', [])
             //if (nv === last_selected_value)
             //  return;
 
-            suggest(nv, current_element);
+            suggest(nv, current_element, ov);
             position_autocomplete();
           }
         );
       }
       that.attach = debounce(_attach, user_options.debounce_attach);
 
-      function _suggest(term, target_element) {
+      function _suggest(term, target_element, oldTerm) {
         $scope.selected_index = 0;
         $scope.waiting_for_suggestion = true;
 
@@ -145,7 +145,7 @@ angular.module('MassAutoComplete', [])
                 // to return to his original expression after suggestions were made.
                 $scope.results = [{ value: term, label: '' }].concat(suggestions);
                 $scope.selection = term.length > 0 && suggestions.length > 0 ? suggestions[0].value : '';
-                if ($scope.selection === term && term.length > 0) {
+                if ($scope.selection === term && (term.length > 0 || (term.length === 0 && oldTerm.length > 0))) {
                   // The auto_complete list will be closed if selection and term are equal and not empty.
                   $scope.show_autocomplete = false;
                 }
