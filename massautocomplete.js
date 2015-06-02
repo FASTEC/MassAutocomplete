@@ -322,7 +322,7 @@ angular.module('MassAutoComplete', [])
                 $scope.$apply();
               }
               else {
-                suggest('', current_element);
+                suggest(current_element.val(), current_element);
               }
               break;
 
