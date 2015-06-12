@@ -165,7 +165,7 @@ angular.module('MassAutoComplete', [])
           ).finally(function suggest_finally() {
             $scope.waiting_for_suggestion = false;
             if ($scope.results.length === 0) {
-              $scope.selection = '';
+              $scope.selection = term;
             }
           });
         } else {
