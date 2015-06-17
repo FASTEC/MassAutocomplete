@@ -10,7 +10,7 @@ angular.module('MassAutoComplete', [])
     transclude: true,
     template:
       '<span ng-transclude></span>' +
-      '<div class="mass-autocomplete background" type="text" ng-bind="selection" />' +
+      '<div class="autocomplete suggestion" type="text" ng-bind="selection" />' +
       '<div class="ac-container" ng-show="show_autocomplete && results.length > 0" style="position:absolute;">' +
         '<ul class="ac-menu">' +
           '<li ng-repeat="result in results" ng-if="$index > 0" ' +
