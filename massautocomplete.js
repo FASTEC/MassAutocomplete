@@ -75,16 +75,18 @@ angular.module('MassAutoComplete', [])
       }
 
       function _position_autocomplete() {
-        var cur_element = angular.element(current_element[0]),
-            position = cur_element.position(),
-            container = angular.element($scope.container[0]);
+        if (current_element) {
+          var cur_element = angular.element(current_element[0]),
+              position = cur_element.position(),
+              container = angular.element($scope.container[0]);
 
-        container.css('top', position.top + cur_element.outerHeight());
-        var left = position.left;
-        var textWidth = current_options.offset_width ? current_options.offset_width(cur_element) : 0;
+          container.css('top', position.top + cur_element.outerHeight());
+          var left = position.left;
+          var textWidth = current_options.offset_width ? current_options.offset_width(cur_element) : 0;
 
-        container.css('left', left + textWidth);
-      }
+          container.css('left', left + textWidth);
+        }
+      
 
       var position_autocomplete = debounce(_position_autocomplete, user_options.debounce_position);
 
