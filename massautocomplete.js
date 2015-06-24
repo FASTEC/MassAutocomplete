@@ -86,7 +86,7 @@ angular.module('MassAutoComplete', [])
 
           container.css('left', left + textWidth);
         }
-      
+      }
 
       var position_autocomplete = debounce(_position_autocomplete, user_options.debounce_position);
 
