@@ -187,7 +187,7 @@ angular.module('MassAutoComplete', [])
       // this directive to the input element.
       that.detach = function() {
         if (current_element) {
-          var value = current_element.val();
+          var value = !current_element.attr('contenteditable') ? current_element.val() : current_element.html();
           update_model_value(value);
           current_options.on_detach && current_options.on_detach(value);
           current_element.unbind(EVENTS.KEYDOWN);
@@ -219,7 +219,12 @@ angular.module('MassAutoComplete', [])
         // because we watch the model value and setting it will trigger
         // a new suggestion cycle.
         var selected = $scope.results[i];
-        current_element.val(selected.value);
+        if (!current_element.attr('contenteditable')) {
+          current_element.val(selected.value);
+        }
+        else {
+          current_element.html(selected.value);
+        }
         $scope.selected_index = i;
 
         if (i > 0) {
@@ -275,7 +280,12 @@ angular.module('MassAutoComplete', [])
                 $scope.show_autocomplete = false;
                 $scope.$apply();
               } else {
-                current_element.val(previous_value);
+                if (!current_element.attr('contenteditable')) {
+                  current_element.val(previous_value);
+                }
+                else {
+                  current_element.html(previous_value);
+                }
               }
               break;
 
@@ -328,7 +338,12 @@ angular.module('MassAutoComplete', [])
                 $scope.$apply();
               }
               else {
-                suggest(current_element.val(), current_element);
+                if (!current_element.attr('contenteditable')) {
+                  suggest(current_element.val(), current_element);
+                }
+                else {
+                  suggest(current_element.html(), current_element);
+                }
               }
               break;
 
